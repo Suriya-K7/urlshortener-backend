@@ -10,8 +10,8 @@ const urlRouter = require("./Controller/urlRoutes");
 const loginRouter = require("./Controller/loginRoutes");
 const redirectRouter = require("./Controller/redirectRoutes");
 
-app.use(cors());
 app.use(express.json());
+app.use(cors());
 
 mongoose.set("strictQuery", false);
 

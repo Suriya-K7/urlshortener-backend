@@ -10,6 +10,9 @@ const urlSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
+  random: {
+    type: String,
+  },
   createdon: {
     type: Date,
     default: Date.now(),

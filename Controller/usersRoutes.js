@@ -4,17 +4,10 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { EMAIL_ADDRESS, EMAIL_PASSWORD } = require("../utlis/config");
 
-usersRouter.get("/user", async (req, res) => {
-  let users = await User.find({}, {}).populate({ path: "url" });
-  res.status(200).json(users);
-});
-
-// getting full data
-
-usersRouter.get("/user", async (req, res) => {
-  let users = await User.find({}, {}).populate({ path: "url" });
-  res.status(200).json(users);
-});
+// usersRouter.get("/user", async (req, res) => {
+//   let users = await User.find({}, {}).populate({ path: "url" });
+//   res.status(200).json(users);
+// });
 
 // sign up new user
 usersRouter.post("/user/signup", async (req, res) => {
@@ -30,13 +23,43 @@ usersRouter.post("/user/signup", async (req, res) => {
       res.status(400).json({ Err: "user already exists" });
       return;
     }
+
+    // generating random string
+
+    const randomString =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+    const link = `http://localhost:3000/user/confirm/${randomString}`;
+
     // hashed password
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       username,
       email,
       password: hashedPassword,
+      resetToken: randomString,
     });
+
+    //sending email for resetting
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: EMAIL_ADDRESS,
+        pass: EMAIL_PASSWORD,
+      },
+    });
+
+    const sendMail = async () => {
+      const info = await transporter.sendMail({
+        from: `"Udhayasooriyan" <${EMAIL_ADDRESS}>`,
+        to: user.email,
+        subject: "Confirm account",
+        text: link,
+      });
+    };
+
+    sendMail();
 
     if (user) {
       res.status(201).json({ message: `${user.username} Data saved` });
@@ -44,7 +67,28 @@ usersRouter.post("/user/signup", async (req, res) => {
       res.status(404).json({ Err: "user data already exist" });
     }
   } catch (error) {
-    console.error(error);
+    return res.status(400).json({ Err: "Error on sign up please try again" });
+  }
+});
+
+// Creating link for sedding authorise link to email
+
+usersRouter.patch("/user/confirm/:id", async (req, res) => {
+  try {
+    const resetToken = req.params.id;
+    const matchedUser = await User.findOne({ resetToken });
+    if (matchedUser === null || matchedUser.resetToken === "") {
+      return res
+        .status(400)
+        .json({ Err: "user not exists or reset link expired" });
+    }
+    matchedUser.verified = true;
+    await User.findByIdAndUpdate(matchedUser.id, matchedUser);
+    res.status(201).json({
+      message: `${matchedUser.username} account verfied has beed changed sucessfully kindly visit login page`,
+    });
+  } catch (error) {
+    return res.status(400).json({ Err: "user not exists or link expired" });
   }
 });
 
@@ -66,7 +110,7 @@ usersRouter.put("/user/forgot", async (req, res) => {
     const randomString =
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);
-    const link = `https://login-page-fe.netlify.app/users/reset/${randomString}`;
+    const link = `http://localhost:3000/user/reset/${randomString}`;
 
     matchedUser.resetToken = randomString;
     await User.findByIdAndUpdate(matchedUser.id, matchedUser);
@@ -109,7 +153,6 @@ usersRouter.patch("/user/reset/:id", async (req, res) => {
     const resetToken = req.params.id;
     const { password } = req.body;
     const matchedUser = await User.findOne({ resetToken });
-    console.log(matchedUser.password);
     if (matchedUser === null || matchedUser.resetToken === "") {
       return res
         .status(400)
@@ -120,7 +163,6 @@ usersRouter.patch("/user/reset/:id", async (req, res) => {
     matchedUser.resetToken = "";
 
     await User.findByIdAndUpdate(matchedUser.id, matchedUser);
-    console.log(matchedUser.password);
     res.status(201).json({
       message: `${matchedUser.username} password has beed changed sucessfully`,
     });

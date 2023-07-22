@@ -26,7 +26,7 @@ urlRouter.get("/user/url", async (req, res) => {
   }
 
   const urls = await User.findById(decodedToken.id).populate("url");
-
+  console.log(urls);
   res.status(200).json(urls.url);
 });
 
@@ -57,11 +57,12 @@ urlRouter.post("/user/url", async (req, res) => {
   for (i = 0; i < 4; i++) {
     random += letters[Math.floor(Math.random() * letters.length)];
   }
-  const shorturl = "http://localhost:3001/" + random;
+  const shorturl = "http://localhost:3001/st/" + random;
 
   const url = new Url({
     longurl: body.longurl,
     shorturl: shorturl,
+    random: random,
     user: user._id,
   });
 

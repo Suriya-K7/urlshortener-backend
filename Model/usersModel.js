@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
   resetToken: {
     type: String,
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
   url: [
     {
       type: mongoose.Schema.Types.ObjectId,
