@@ -1,6 +1,6 @@
 const urlRouter = require("express").Router();
 const jwt = require("jsonwebtoken");
-const { SECRET } = require("../utlis/config");
+const { SECRET, BEURL } = require("../utlis/config");
 const User = require("../Model/usersModel");
 const Url = require("../Model/urlModel");
 
@@ -60,7 +60,7 @@ urlRouter.post("/user/url", async (req, res) => {
   for (i = 0; i < 4; i++) {
     random += letters[Math.floor(Math.random() * letters.length)];
   }
-  const shorturl = "http://localhost:3001/st/" + random;
+  const shorturl = `${BEURL}/st/` + random;
 
   const url = new Url({
     longurl: body.longurl,

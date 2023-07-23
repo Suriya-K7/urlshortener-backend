@@ -2,7 +2,7 @@ const usersRouter = require("express").Router();
 const User = require("../Model/usersModel");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
-const { EMAIL_ADDRESS, EMAIL_PASSWORD } = require("../utlis/config");
+const { EMAIL_ADDRESS, EMAIL_PASSWORD, FEURL } = require("../utlis/config");
 
 // usersRouter.get("/user", async (req, res) => {
 //   let users = await User.find({}, {}).populate({ path: "url" });
@@ -29,7 +29,7 @@ usersRouter.post("/user/signup", async (req, res) => {
     const randomString =
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);
-    const link = `http://localhost:3000/user/confirm/${randomString}`;
+    const link = `${FEURL}/user/confirm/${randomString}`;
 
     // hashed password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -110,7 +110,7 @@ usersRouter.put("/user/forgot", async (req, res) => {
     const randomString =
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15);
-    const link = `http://localhost:3000/user/reset/${randomString}`;
+    const link = `${FEURL}/user/reset/${randomString}`;
 
     matchedUser.resetToken = randomString;
     await User.findByIdAndUpdate(matchedUser.id, matchedUser);
