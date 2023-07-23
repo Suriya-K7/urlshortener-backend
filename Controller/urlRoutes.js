@@ -17,7 +17,11 @@ const getTokenFrom = (req) => {
 urlRouter.get("/user/url", async (req, res) => {
   //getting token of authorised user
   const token = getTokenFrom(req);
-
+  if (!token) {
+    return res
+      .status(401)
+      .json({ error: "session timeout please login again" });
+  }
   //verify the token
   const decodedToken = jwt.verify(token, SECRET);
   // if token is not valid, return error
@@ -26,7 +30,6 @@ urlRouter.get("/user/url", async (req, res) => {
   }
 
   const urls = await User.findById(decodedToken.id).populate("url");
-  console.log(urls);
   res.status(200).json(urls.url);
 });
 
