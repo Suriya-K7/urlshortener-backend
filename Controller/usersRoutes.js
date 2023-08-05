@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const { EMAIL_ADDRESS, EMAIL_PASSWORD, FEURL } = require("../utlis/config");
 
+// getting all users
 // usersRouter.get("/user", async (req, res) => {
 //   let users = await User.find({}, {}).populate({ path: "url" });
 //   res.status(200).json(users);
